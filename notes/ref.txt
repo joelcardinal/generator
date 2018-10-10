@@ -1,0 +1,12 @@
+https://nodejs.org/dist/latest-v10.x/docs/api/
+
+https://eslint.org/docs/user-guide/configuring
+
+https://eslint.org/docs/rules/comma-dangle
+
+https://docs.npmjs.com/misc/scripts
+
+inpired by:
+https://hackernoon.com/building-a-simple-static-page-generator-with-node-js-4f58f680c47d
+
+https://medium.com/douglas-matoso-english/build-static-site-generator-nodejs-8969ebe34b22

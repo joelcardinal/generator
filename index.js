@@ -8,6 +8,7 @@ var fs = require("fs"),
 // TODO: lots of 'for in' that should or could be 'for of'
 // TODO: remove hardcoded paths and use config file
 // TODO: add plugin system so that generator won't be site specific
+// TODO: add npm hook to run local server for testing output
 
 (function(){
   var cssArr=[],
