@@ -1,0 +1,36 @@
+{
+  "name": "generator",
+  "engines" : { "node" : ">=10.11.0" },
+  "version": "0.0.1",
+  "description": "Yet another static site generator...this time it's personal.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Joel Cardinal",
+  "license": "ISC",
+  "eslintConfig": {
+    "extends": "eslint:recommended",
+    "parserOptions": {
+        "ecmaVersion": 8,
+        "sourceType": "script",
+        "ecmaFeatures": {
+            "jsx": true
+        }
+    },
+    "env": {
+        "browser": true,
+        "node": true
+    },
+    "rules": {
+        "indent": ["error", 2],
+        "linebreak-style": ["error", "unix"],
+        "quotes": ["warn", "double"],
+        "semi": ["error", "always"],
+        "comma-dangle": ["error", "never"],
+        "no-unused-vars" : ["warn", { "vars": "all", "args": "after-used", "ignoreRestSiblings": false }],
+        "no-console": "off"
+    },
+    "root": true
+  }
+}

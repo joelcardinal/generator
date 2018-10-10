@@ -1,0 +1,22 @@
+/*
+* Utility to populate templates on client and server
+* 	str = 'I went to the {{location}} and found {{item}}';
+* 	obj = {location : getLocation(), item : getItem()};
+* 	returns a String
+*/
+getFilledTplStr : function (str,obj){
+	function replacer() {
+		var content = obj[arguments[1].trim()];
+		return content ? content : '';
+	}
+	return str.replace(/{{([^}}]+)?}}/g, replacer);
+}
+
+// or
+
+function g(type, fileName){
+	return `${type}, ${fileName}`;
+}
+var str = `Hello ${g('css','main')}`;
+
+console.log(str);
