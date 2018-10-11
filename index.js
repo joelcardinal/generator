@@ -14,7 +14,6 @@ var fs = require("fs"),
 
 (function(){
   var cssArr=[],
-    pageNames=[],
     js = {top:[],bottom:[]},
     defaultMetaData = {
       "baseURL" : "https://example.com",
@@ -156,7 +155,6 @@ var fs = require("fs"),
   var pageFiles = fs.readdirSync("./input/pages","utf8");
   for (var i in pageFiles){
     var fileName = pageFiles[i];
-    pageNames.push( /\.html/.test(fileName) ? fileName : fileName+".html" );
     console.log("Adding page: "+fileName);
     // TODO: this assumes page directory has no sub-directories
     var page = fs.readFileSync(path.join("./input/pages",fileName), "utf8");
@@ -181,6 +179,7 @@ var fs = require("fs"),
 
   // sitemap
   console.log("Creating sitemap...");
+  var pageNames = fs.readdirSync(outputPath,"utf8");
   var sitemap = '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">'+
     "<url><loc>"+htmlMetaData.baseURL+"/"+
     pageNames.reverse().join("</loc><changefreq>weekly</changefreq></url><url><loc>"+htmlMetaData.baseURL+"/")+
