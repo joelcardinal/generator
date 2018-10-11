@@ -1,19 +1,23 @@
 var fs = require("fs"),
   path = require("path"),
-  execSync = require('child_process').execSync,
+  execSync = require("child_process").execSync,
   outputPath = "./output",
   copyFolders = ["images", "css", "js"];
 
-// TODO: this all assumes all file names are unique - very bad
+// IMPORTANT: requires all file names are unique
+
 // TODO: lots of 'for in' that should or could be 'for of'
 // TODO: remove hardcoded paths and use config file
 // TODO: add plugin system so that generator won't be site specific
 // TODO: add npm hook to run local server for testing output
+// TODO: need logic to handle pages that actually turn into many pages, including the sitemap
 
 (function(){
   var cssArr=[],
+    pageNames=[],
     js = {top:[],bottom:[]},
     defaultMetaData = {
+      "baseURL" : "https://example.com",
       "lang": "en",
       "title": "Index",
       "charset": "utf-8",
@@ -152,6 +156,7 @@ var fs = require("fs"),
   var pageFiles = fs.readdirSync("./input/pages","utf8");
   for (var i in pageFiles){
     var fileName = pageFiles[i];
+    pageNames.push( /\.html/.test(fileName) ? fileName : fileName+".html" );
     console.log("Adding page: "+fileName);
     // TODO: this assumes page directory has no sub-directories
     var page = fs.readFileSync(path.join("./input/pages",fileName), "utf8");
@@ -173,6 +178,14 @@ var fs = require("fs"),
     cssArr = [];
     htmlMetaData = defaultMetaData;
   }
+
+  // sitemap
+  console.log("Creating sitemap...");
+  var sitemap = '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">'+
+    "<url><loc>"+htmlMetaData.baseURL+"/"+
+    pageNames.reverse().join("</loc><changefreq>weekly</changefreq></url><url><loc>"+htmlMetaData.baseURL+"/")+
+    "</loc><changefreq>weekly</changefreq></url></urlset>";
+  fs.writeFileSync(path.join(outputPath,"sitemap.xml"), sitemap.replace("index.html",""));
 
   // Copy asset folders into build folder.
   // TODO: concat/compress assets
