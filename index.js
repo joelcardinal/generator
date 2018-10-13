@@ -10,7 +10,7 @@ var fs = require("fs"),
 // TODO: remove hardcoded paths and use config file
 // TODO: add plugin system so that generator won't be site specific
 // TODO: add npm hook to run local server for testing output
-// TODO: need logic to handle pages that actually turn into many pages, including the sitemap
+// TODO: put HTML <meta in array so arbitrary data can be added
 
 (function(){
   var cssArr=[],
