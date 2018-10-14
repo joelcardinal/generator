@@ -183,8 +183,6 @@ var fs = require("fs"),
         // TODO: this assumes page directory has no sub-directories
         var page = fs.readFileSync(path.join(app.data.configs.filePaths.pages,fileName), "utf8");
         var pageData = app.getDataObj(page);
-        var header = "";
-        var footer = "";
         page = app.getComponents(app.removeDataString(page));
         if(pageData){
           app.addJS(pageData);
