@@ -5,7 +5,7 @@
   "description": "Yet another static site generator...this time it's personal.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node index.js && cd ../output && open http://127.0.0.1:8080 && python -m SimpleHTTPServer 8080"
   },
   "author": "Joel Cardinal",
   "license": "ISC",
