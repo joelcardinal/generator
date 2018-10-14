@@ -62,6 +62,7 @@ var fs = require("fs"),
     },
 
     setConfigs : function (data){
+      if(!data){return;}
       for(var dataKey in data.metaData){
         app.data.configs.metaData[dataKey] = data.metaData[dataKey];
       }
@@ -82,7 +83,6 @@ var fs = require("fs"),
       var scripts = "";
       var jsArrReversed = app.data.js[type].reverse();
       for(var fileName of jsArrReversed){
-        fileName = /\.js/.test(fileName) ? fileName : fileName+".js";
         scripts += '<script src="js/'+fileName+'"></script>';
       }
       return scripts;
@@ -92,7 +92,6 @@ var fs = require("fs"),
       var cssIncludes = "";
       var cssArrReversed = app.data.cssArr.reverse();
       for(var fileName of cssArrReversed){
-        fileName = /\.css/.test(fileName) ? fileName : fileName+".css";
         cssIncludes += '<link rel="styleguide" href="css/'+fileName+'"></link>';
       }
       return cssIncludes;
@@ -136,20 +135,32 @@ var fs = require("fs"),
       if(!data){return;}
       if(data.js && data.js.top.length){
         for(var y in data.js.top){
-          app.data.js.top.push(data.js.top[y]);
+          var jsFileNameTop = data.js.top[y];
+          jsFileNameTop = /\.js/.test(jsFileNameTop) ? jsFileNameTop : jsFileNameTop+".js";
+          if(app.data.js.top.indexOf(jsFileNameTop) === -1){
+            app.data.js.top.push(jsFileNameTop);
+          }
         }
       }
       if(data.js && data.js.bottom.length){
         for(var z in data.js.bottom){
-          app.data.js.bottom.push(data.js.bottom[z]);
+          var jsFileNameBottom = data.js.bottom[z];
+          if(app.data.js.top.indexOf(jsFileNameBottom) === -1){
+            app.data.js.bottom.push(jsFileNameBottom);
+          }
         }
       }
     },
   
     addCSS : function(data){
+      if(!data){return;}
       if(data && data.css && data.css.length){
         for(var w in data.css){
-          app.data.cssArr.push(data.css[w]);
+          var cssFileName = data.css[w];
+          cssFileName = /\.css/.test(cssFileName) ? cssFileName : cssFileName+".css";
+          if(app.data.js.top.indexOf(cssFileName) === -1){
+            app.data.cssArr.push(cssFileName);
+          }
         }
       }
     },
