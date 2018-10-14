@@ -47,6 +47,7 @@ var fs = require("fs"),
     },
 
     getFinalHtml : function(page){
+      // TODO: could remove unnecessary whitespace/line breaks in HTML
       var mainHtml = fs.readFileSync(app.data.configs.filePaths.mainHtml, "utf8");
       // silly to add to metaData, but efficient
       app.data.configs.metaData.topJS = app.getJSHtml("top");
