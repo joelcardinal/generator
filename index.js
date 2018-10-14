@@ -46,35 +46,19 @@ var fs = require("fs"),
       }
     },
 
-    getHtmlTop : function(){
-      var page = fs.readFileSync(app.data.configs.filePaths.htmlTop, "utf8");
+    getFinalHtml : function(page){
+      var mainHtml = fs.readFileSync(app.data.configs.filePaths.mainHtml, "utf8");
       // silly to add to metaData, but efficient
       app.data.configs.metaData.topJS = app.getJSHtml("top");
       app.data.configs.metaData.topCSS = app.getCssHtml();
       app.data.configs.metaData.topMetaTags = app.getMetaTags();
+      app.data.configs.metaData.page = page;
+      app.data.configs.metaData.bottomJS = app.getJSHtml('bottom');
       function replacer() {
         var content = app.data.configs.metaData[arguments[1].trim()];
         return content ? content : "";
       }
-      return page.replace(/{{([^}}]+)?}}/g, replacer);
-    },
-
-    getHeaderFooter : function(type, pageData){
-      var headOrFoot = pageData[type],
-        header = "";
-      if(headOrFoot){
-        var fileName = /\.html/.test(headOrFoot) ? headOrFoot : headOrFoot+".html";
-        var data = "";
-        header = fs.readFileSync(path.join(app.data.configs.filePaths[type], fileName), "utf8");
-        data = app.getDataObj(header);
-        header = app.getComponents(app.removeDataString(header));
-        if(data){
-          app.addJS(data);
-          app.addCSS(data);
-          app.setConfigs(data);
-        }
-      }
-      return header;
+      return mainHtml.replace(/{{([^}}]+)?}}/g, replacer);
     },
 
     setConfigs : function (data){
@@ -149,6 +133,7 @@ var fs = require("fs"),
     },
   
     addJS : function(data){
+      if(!data){return;}
       if(data.js && data.js.top.length){
         for(var y in data.js.top){
           app.data.js.top.push(data.js.top[y]);
@@ -162,7 +147,7 @@ var fs = require("fs"),
     },
   
     addCSS : function(data){
-      if(data.css && data.css.length){
+      if(data && data.css && data.css.length){
         for(var w in data.css){
           app.data.cssArr.push(data.css[w]);
         }
@@ -202,13 +187,11 @@ var fs = require("fs"),
         var footer = "";
         page = app.getComponents(app.removeDataString(page));
         if(pageData){
-          header = app.getHeaderFooter("headers",pageData);
-          footer = app.getHeaderFooter("footers",pageData);
           app.addJS(pageData);
           app.addCSS(pageData);
           app.setConfigs(pageData);
         }
-        page = app.getHtmlTop() + header + page + footer + app.getJSHtml('bottom') + "</body></html>";
+        page = app.getFinalHtml(page);
         fs.writeFileSync(path.join(app.data.configs.filePaths.output,fileName),page);
         // reset data for next page
         app.data.js = {top:[],bottom:[]};
