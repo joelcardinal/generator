@@ -56,6 +56,8 @@ Your mainHTML file must contain the following template replacement strings:
 {{topJS}}
 ```
 
+Currently requires filePaths directories have no sub-directories within them, for example if your pages directory had a sub-directory called "blog", none of the HTML files in the "blog" directory would get processed.
+
 **See example/ for reference.**
 
 ## To Run

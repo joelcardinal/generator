@@ -3,8 +3,6 @@ var fs = require("fs"),
   execSync = require("child_process").execSync,
   process = require("process");
 
-// IMPORTANT: requires all file names are unique
-
 // TODO: more try/catch process.exit(1)
 // TODO: disregard input directories that are not provided in configs.json?
 // TODO: improve code architecture for method use by plugins
