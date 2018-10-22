@@ -1,0 +1,24 @@
+{
+  "baseURL" : "https://example.com",
+  "metaData" : {
+    "lang": "en",
+    "title": "Index",
+    "charset": "utf-8"
+  },
+  "metaTags" : {
+    "description": "This is a page",
+    "keywords": "page, sample",
+    "author": "None"
+  },
+  "copyFolders" : ["images", "css", "js"],
+  "filePaths" : {
+    "input" : "../input",
+    "components" : "../input/components",
+    "pages" : "../input/pages",
+    "plugins" : "../input/plugins",   
+    "favicon" :  "../input/favicon.ico", 
+    "output" : "../output",
+    "mainHtml" : "../input/components/mainHtml.html"
+  }
+
+}

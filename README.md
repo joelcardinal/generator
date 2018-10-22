@@ -56,7 +56,7 @@ Your mainHTML file must contain the following template replacement strings:
 {{topJS}}
 ```
 
-**See input-example.zip for reference.**
+**See example/ for reference.**
 
 ## To Run
 Simply run: ```node index.js FULL/PATH/TO/CONFIGS.JSON```
