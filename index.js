@@ -1,9 +1,14 @@
 var fs = require("fs"),
   path = require("path"),
   execSync = require("child_process").execSync,
-  externalConfigs = require("../configs.json");
+  process = require("process");
 
 // IMPORTANT: requires all file names are unique
+
+// TODO: more try/catch process.exit(1)
+// TODO: disregard input directories that are not provided in configs.json?
+// TODO: improve code architecture for method use by plugins
+// TODO: default CSS/JS file listed in configs.json used on all pages?
 
 (function(){
 
@@ -15,11 +20,12 @@ var fs = require("fs"),
         bottom:[]
       },
       configs : {},
+      externalConfigs : {},
       pagesToSkip : []
     },
 
     init : function(){
-      app.data.configs = externalConfigs;
+      app.data.configs = app.getExternalConfigs();
       app.processPlugins();
       app.deleteOutput();
       app.processPages();
@@ -27,6 +33,16 @@ var fs = require("fs"),
       app.copyFilesToOutput();
       // Process complete.
       console.log("Done!");
+    },
+
+    getExternalConfigs : function(){
+      var configPath = process.argv.length > 2 && process.argv[2];
+      if(configPath){
+        app.data.externalConfigs = require(configPath);
+        return app.data.externalConfigs;
+      }
+      console.log("Error config path not provided in command line");
+      process.exit(1);
     },
 
     processPlugins : function (){
@@ -54,7 +70,7 @@ var fs = require("fs"),
       app.data.configs.metaData.topCSS = app.getCssHtml();
       app.data.configs.metaData.topMetaTags = app.getMetaTags();
       app.data.configs.metaData.page = page;
-      app.data.configs.metaData.bottomJS = app.getJSHtml('bottom');
+      app.data.configs.metaData.bottomJS = app.getJSHtml("bottom");
       function replacer() {
         var content = app.data.configs.metaData[arguments[1].trim()];
         return content ? content : "";
@@ -206,7 +222,7 @@ var fs = require("fs"),
         // reset data for next page
         app.data.js = {top:[],bottom:[]};
         app.data.cssArr = [];
-        app.data.configs = externalConfigs;
+        app.data.configs = app.data.externalConfigs;
       }
     },
 
@@ -234,6 +250,9 @@ var fs = require("fs"),
           // Alternative depending on how cp -r works on different OS's
           // execSync(`mkdir -p ${dist} && cp -r ${src} ${dist}`);
         }
+        try {
+          execSync(`cp -r ${app.data.configs.filePaths.favicon} ${app.data.configs.filePaths.output}/favicon.ico`);
+        }catch(err){/* node will print error*/}
       }catch(err){
         console.log("Error during folder copying: "+err);
         process.exit(1);
