@@ -18,14 +18,13 @@ var fs = require("fs"),
         bottom:[]
       },
       configs : {},
-      externalConfigs : {},
       pagesToSkip : []
     },
 
     init : function(){
       app.data.configs = app.getExternalConfigs();
-      app.processPlugins();
       app.deleteOutput();
+      app.processPlugins();
       app.processPages();
       app.createSitemap();
       app.copyFilesToOutput();
@@ -36,8 +35,8 @@ var fs = require("fs"),
     getExternalConfigs : function(){
       var configPath = process.argv.length > 2 && process.argv[2];
       if(configPath){
-        app.data.externalConfigs = require(configPath);
-        return app.data.externalConfigs;
+        // need to clone or else it gets overwritten
+        return JSON.parse(JSON.stringify(require(configPath)));
       }
       console.log("Error config path not provided in command line");
       process.exit(1);
@@ -89,7 +88,7 @@ var fs = require("fs"),
     getMetaTags : function(){
       var html = "";
       for(var key in app.data.configs.metaTags){
-        html += `<meta name="${key}" content="${app.data.configs.metaTags[key]}"></meta>`;
+        html += `<meta name="${key}" content="${app.data.configs.metaTags[key]}">\n`;
       }
       return html;
     },
@@ -130,16 +129,25 @@ var fs = require("fs"),
       function replacer() {
         var component = "";
         var componentName = arguments[1].trim();
-        componentName = /^c-/.test(componentName) ? componentName.replace("c-","") : componentName;
-        componentName = /\.html/.test(componentName) ? componentName : componentName+".html";
-        try{
-          component = fs.readFileSync(path.join(app.data.configs.filePaths.components,componentName), "utf8");
-          var componentData = app.getDataObj(component);
-          app.addJS(componentData);
-          app.addCSS(componentData);        
-          component = app.removeDataString(component);
-        }catch(err){
-          console.log("Error getComponents("+componentName+"): "+err);
+        var isValidComponent = /^c-/.test(componentName);
+        if(isValidComponent){
+          componentName = isValidComponent ? componentName.replace("c-","") : componentName;
+          componentName = /\.html/.test(componentName) ? componentName : componentName+".html";
+          try{
+            var filePath = path.join(app.data.configs.filePaths.components,componentName);
+            if(fs.existsSync(filePath)){
+              component = fs.readFileSync(filePath, "utf8");
+              var componentData = app.getDataObj(component);
+              app.addJS(componentData);
+              app.addCSS(componentData);        
+              component = app.removeDataString(component);
+            }
+          }catch(err){
+            console.log("Error getComponents("+componentName+"): "+err);
+          }
+          
+        }else{
+          return '{{ '+arguments[1]+' }}';
         }
         return component;
       }
@@ -147,21 +155,18 @@ var fs = require("fs"),
     },
   
     addJS : function(data){
-      if(!data){return;}
-      if(data.js && data.js.top.length){
-        for(var y in data.js.top){
-          var jsFileNameTop = data.js.top[y];
-          jsFileNameTop = /\.js/.test(jsFileNameTop) ? jsFileNameTop : jsFileNameTop+".js";
-          if(app.data.js.top.indexOf(jsFileNameTop) === -1){
-            app.data.js.top.push(jsFileNameTop);
-          }
-        }
-      }
-      if(data.js && data.js.bottom.length){
-        for(var z in data.js.bottom){
-          var jsFileNameBottom = data.js.bottom[z];
-          if(app.data.js.top.indexOf(jsFileNameBottom) === -1){
-            app.data.js.bottom.push(jsFileNameBottom);
+      if(!(data && data.js)){return;}
+      var arr = ["top","bottom"];
+      for(var i in arr){
+        var type = arr[i];
+        var jsArr = data.js[type];
+        if(data.js && jsArr && jsArr.length){
+          for(var y in jsArr){
+            var jsFileName = jsArr[y];
+            jsFileName = /\.js/.test(jsFileName) ? jsFileName : jsFileName+".js";
+            if(app.data.js[type].indexOf(jsFileName) === -1){
+              app.data.js[type].push(jsFileName);
+            }
           }
         }
       }
@@ -201,10 +206,16 @@ var fs = require("fs"),
       // handle each page
       var pageFiles = fs.readdirSync(app.data.configs.filePaths.pages,"utf8");
       for (var fileName of pageFiles){
+        // just in case a plugin doesn't clean itself up
+        app.resetData();
         // Ignore any pages flagged to skip by plugins
         if(app.data.pagesToSkip.indexOf(/\.html/.test(fileName) ? fileName : fileName + ".html") > -1 ||
-          app.data.pagesToSkip.indexOf(/\.html/.test(fileName) ? fileName.replace(".html","") : fileName) > -1
-        ){continue;}
+          app.data.pagesToSkip.indexOf(/\.html/.test(fileName) ? fileName.replace(".html","") : fileName) > -1 ||
+          !fs.existsSync(path.join(app.data.configs.filePaths.pages,(/\.html/.test(fileName) ? fileName : fileName + ".html")))
+        ){
+          console.log("Skipping: "+fileName);
+          continue;
+        }
         console.log("Adding page: "+fileName);
         // TODO: this assumes page directory has no sub-directories
         var page = fs.readFileSync(path.join(app.data.configs.filePaths.pages,fileName), "utf8");
@@ -217,20 +228,31 @@ var fs = require("fs"),
         }
         page = app.getFinalHtml(page);
         fs.writeFileSync(path.join(app.data.configs.filePaths.output,fileName),page);
-        // reset data for next page
-        app.data.js = {top:[],bottom:[]};
-        app.data.cssArr = [];
-        app.data.configs = app.data.externalConfigs;
+        app.resetData();
       }
+    },
+
+    resetData : function(){
+      // reset data for next page
+      app.data.js = {top:[],bottom:[]};
+      app.data.cssArr = [];
+      delete app.data.configs;
+      app.data.configs = app.getExternalConfigs();
     },
 
     createSitemap : function(){
       // sitemap
       console.log("Creating sitemap...");
-      var pageNames = fs.readdirSync(app.data.configs.filePaths.output,"utf8");
+      var dir = fs.readdirSync(app.data.configs.filePaths.output,"utf8");
+      var pageNamesArr = [];
+      for (var fileName of dir){
+        if(/\.html$/.test(fileName) && !/404\.html/.test(fileName)){
+          pageNamesArr.push(fileName);
+        }
+      }
       var sitemap = '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">'+
         "<url><loc>"+app.data.configs.baseURL+"/"+
-        pageNames.reverse().join("</loc><changefreq>weekly</changefreq></url><url><loc>"+app.data.configs.baseURL+"/")+
+        pageNamesArr.reverse().join("</loc><changefreq>weekly</changefreq></url><url><loc>"+app.data.configs.baseURL+"/")+
         "</loc><changefreq>weekly</changefreq></url></urlset>";
         // TODO: this assumes page directory has no sub-directories 
       fs.writeFileSync(path.join(app.data.configs.filePaths.output,"sitemap.xml"), sitemap.replace("index.html",""));
@@ -241,9 +263,9 @@ var fs = require("fs"),
       // TODO: concat/compress assets
       console.log("Copying folders...");
       try {
-        for(var copyFolder of app.data.configs.copyFolders){
-          var src= path.join(app.data.configs.filePaths.input,copyFolder);
-          var dist= path.join(app.data.configs.filePaths.output,copyFolder);
+        for(var toCopy of app.data.configs.toCopy){
+          var src= path.join(app.data.configs.filePaths.input,toCopy);
+          var dist= path.join(app.data.configs.filePaths.output,toCopy);
           execSync(`cp -r ${src} ${dist}`);
           // Alternative depending on how cp -r works on different OS's
           // execSync(`mkdir -p ${dist} && cp -r ${src} ${dist}`);

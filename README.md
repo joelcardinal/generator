@@ -7,7 +7,7 @@ Site generator logic uses the following to create output:
 * config.json = default meta-data and directory paths.
 * pages = content, what will be added in the body of an HTML page.
 * components = sub-sections of HTML that can be reused across HTML pages (e.g. headers, footers).
-* copyFolders = directories in your input path that will be copied to the output path (e.g. images, css, js).
+* toCopy = directories or files in the root of your input directory that will be copied to the output path (e.g. images, css, js).
 * plugins = your custom scripts the site generator will run automatically.
 
 Plugins are really just modules that are passed the scripts app object, so your code can take advatange of existing methods of app.
@@ -30,7 +30,7 @@ configs.json file populated with all expected directory paths (example below). F
     "keywords": "page, sample",
     "author": "None"
   },
-  "copyFolders" : ["images", "css", "js"],
+  "toCopy" : ["images", "css", "js"],
   "filePaths" : {
     "input" : "../input",
     "components" : "../input/components",
