@@ -7,6 +7,12 @@ var fs = require("fs"),
 // TODO: disregard input directories that are not provided in configs.json?
 // TODO: improve code architecture for method use by plugins
 // TODO: default CSS/JS file listed in configs.json used on all pages?
+// TODO: min. and add CSS inline (AMP style)? (or plugin?)
+// TODO: Search
+// TODO: do plugin on init (already have but relabel)
+// TODO: do plugin on page creation before running native JS
+// TODO: do plugin on page creation after running native JS
+// TODO: do plugin after pages made (maybe make sitemap creation a plugin)
 
 (function(){
 
