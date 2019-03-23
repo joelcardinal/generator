@@ -255,7 +255,7 @@ var fs = require("fs"),
         pageNamesArr.reverse().join("</loc><changefreq>weekly</changefreq></url><url><loc>"+app.data.configs.baseURL+"/")+
         "</loc><changefreq>weekly</changefreq></url></urlset>";
         // TODO: this assumes page directory has no sub-directories 
-      fs.writeFileSync(path.join(app.data.configs.filePaths.output,"sitemap.xml"), sitemap.replace("index.html",""));
+      fs.writeFileSync(path.join(app.data.configs.filePaths.output,"sitemap.xml"), sitemap.replace("/index.html",""));
     },
 
     copyFilesToOutput : function(){
